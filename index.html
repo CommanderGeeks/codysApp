@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cody's - Community Dining</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f7;
+            overflow-x: hidden;
+        }
+        
+        .phone-container {
+            width: 375px;
+            height: 812px;
+            margin: 20px auto;
+            background: #000;
+            border-radius: 40px;
+            padding: 10px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            border-radius: 30px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .status-bar {
+            height: 44px;
+            background: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .app-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .app-header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+        
+        .app-header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .screen {
+            display: none;
+            height: calc(100% - 44px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .screen.active {
+            display: block;
+        }
+        
+        .balance-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 20px;
+            padding: 20px;
+            border-radius: 20px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .balance-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+        
+        .balance-amount {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .balance-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-small {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-small:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .meal-selector {
+            padding: 20px;
+        }
+        
+        .date-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .date-header h2 {
+            font-size: 20px;
+            color: #1d1d1f;
+            margin-bottom: 5px;
+        }
+        
+        .date-header p {
+            color: #86868b;
+            font-size: 14px;
+        }
+        
+        .meal-time-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 0 20px;
+        }
+        
+        .time-tab {
+            flex: 1;
+            padding: 12px;
+            background: #f5f5f7;
+            border: 2px solid #e5e5e7;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .time-tab.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .time-tab .time {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+        
+        .time-tab .slots {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+        
+        .meal-options {
+            padding: 0 20px;
+        }
+        
+        .meal-card {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .meal-card.selected {
+            border-color: #667eea;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.2);
+        }
+        
+        .meal-card h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: #1d1d1f;
+        }
+        
+        .meal-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #e8f4f8;
+            color: #007aff;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+        
+        .meal-badge.vegan {
+            background: #d4f4dd;
+            color: #34c759;
+        }
+        
+        .meal-badge.protein {
+            background: #ffe5e5;
+            color: #ff3b30;
+        }
+        
+        .meal-description {
+            color: #86868b;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+        
+        .meal-nutrition {
+            display: flex;
+            gap: 15px;
+            font-size: 12px;
+            color: #86868b;
+        }
+        
+        .confirm-button {
+            margin: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: calc(100% - 40px);
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .confirm-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .confirm-button:not(:disabled):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #e5e5e7;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0 20px 0;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            color: #86868b;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-item.active {
+            color: #667eea;
+        }
+        
+        .nav-icon {
+            font-size: 24px;
+        }
+        
+        .nav-label {
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            padding: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 16px;
+            border-radius: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #86868b;
+        }
+        
+        .pickup-notification {
+            background: #34c759;
+            color: white;
+            padding: 15px 20px;
+            margin: 20px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .notification-icon {
+            font-size: 24px;
+        }
+        
+        .notification-text {
+            flex: 1;
+        }
+        
+        .notification-text h4 {
+            font-size: 16px;
+            margin-bottom: 2px;
+        }
+        
+        .notification-text p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .qr-container {
+            background: white;
+            margin: 20px;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            background: #000;
+            opacity: 0.1;
+            border-radius: 10px;
+        }
+        
+        .order-details {
+            padding: 20px;
+        }
+        
+        .order-item {
+            background: #f5f5f7;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            margin: 20px;
+            padding: 25px;
+            border-radius: 20px;
+            text-align: center;
+        }
+        
+        .modal-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        .modal h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .modal p {
+            color: #86868b;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .modal-buttons button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .btn-cancel {
+            background: #f5f5f7;
+            color: #86868b;
+        }
+        
+        .btn-confirm {
+            background: #667eea;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-container">
+        <div class="phone-screen">
+            <div class="status-bar">
+                <span>9:41</span>
+                <span>Cody's</span>
+                <span>100%</span>
+            </div>
+            
+            <!-- Home Screen -->
+            <div class="screen active" id="home-screen">
+                <div class="app-header">
+                    <h1>Good Morning! 👋</h1>
+                    <p>Plan tomorrow's meals today</p>
+                </div>
+                
+                <div class="balance-card">
+                    <div class="balance-label">Account Balance</div>
+                    <div class="balance-amount">$48.93</div>
+                    <div class="balance-actions">
+                        <button class="btn-small">Add $50</button>
+                        <button class="btn-small">Add $100</button>
+                        <button class="btn-small">Gift Meals</button>
+                    </div>
+                </div>
+                
+                <div class="pickup-notification">
+                    <span class="notification-icon">🍽️</span>
+                    <div class="notification-text">
+                        <h4>Today's Lunch Ready</h4>
+                        <p>Thai Green Curry • Pick up 11:30-1:30</p>
+                    </div>
+                </div>
+                
+                <div class="meal-selector">
+                    <div class="date-header">
+                        <h2>Tomorrow's Menu</h2>
+                        <p>Saturday, Nov 30 • 847 spots left</p>
+                    </div>
+                    
+                    <div class="meal-time-tabs">
+                        <div class="time-tab active" onclick="selectTimeSlot(this, 'lunch')">
+                            <div class="time">Lunch</div>
+                            <div class="slots">423/500 available</div>
+                        </div>
+                        <div class="time-tab" onclick="selectTimeSlot(this, 'dinner')">
+                            <div class="time">Dinner</div>
+                            <div class="slots">424/500 available</div>
+                        </div>
+                    </div>
+                    
+                    <div class="meal-options" id="lunch-options">
+                        <div class="meal-card" onclick="selectMeal(this)">
+                            <span class="meal-badge vegan">VEGAN</span>
+                            <h3>Mediterranean Bowl</h3>
+                            <p class="meal-description">Quinoa, roasted vegetables, hummus, tahini dressing, fresh herbs</p>
+                            <div class="meal-nutrition">
+                                <span>520 cal</span>
+                                <span>18g protein</span>
+                                <span>GF option</span>
+                            </div>
+                        </div>
+                        
+                        <div class="meal-card" onclick="selectMeal(this)">
+                            <span class="meal-badge">VEGETARIAN</span>
+                            <h3>Mushroom Pasta</h3>
+                            <p class="meal-description">Penne, wild mushrooms, cream sauce, parmesan, garlic bread</p>
+                            <div class="meal-nutrition">
+                                <span>640 cal</span>
+                                <span>22g protein</span>
+                            </div>
+                        </div>
+                        
+                        <div class="meal-card" onclick="selectMeal(this)">
+                            <span class="meal-badge protein">PROTEIN</span>
+                            <h3>Teriyaki Chicken</h3>
+                            <p class="meal-description">Grilled chicken, jasmine rice, steamed broccoli, sesame seeds</p>
+                            <div class="meal-nutrition">
+                                <span>580 cal</span>
+                                <span>35g protein</span>
+                                <span>DF</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="meal-options" id="dinner-options" style="display: none;">
+                        <div class="meal-card" onclick="selectMeal(this)">
+                            <span class="meal-badge vegan">VEGAN</span>
+                            <h3>Thai Red Curry</h3>
+                            <p class="meal-description">Vegetables, tofu, coconut curry, jasmine rice, fresh basil</p>
+                            <div class="meal-nutrition">
+                                <span>540 cal</span>
+                                <span>16g protein</span>
+                                <span>GF</span>
+                            </div>
+                        </div>
+                        
+                        <div class="meal-card" onclick="selectMeal(this)">
+                            <span class="meal-badge">VEGETARIAN</span>
+                            <h3>Margherita Pizza</h3>
+                            <p class="meal-description">Fresh mozzarella, tomato, basil, side salad</p>
+                            <div class="meal-nutrition">
+                                <span>620 cal</span>
+                                <span>24g protein</span>
+                            </div>
+                        </div>
+                        
+                        <div class="meal-card" onclick="selectMeal(this)">
+                            <span class="meal-badge protein">PROTEIN</span>
+                            <h3>Beef Burrito Bowl</h3>
+                            <p class="meal-description">Seasoned beef, rice, beans, salsa, cheese, sour cream</p>
+                            <div class="meal-nutrition">
+                                <span>680 cal</span>
+                                <span>38g protein</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="confirm-button" disabled onclick="confirmOrder()">
+                    Select a Meal to Continue
+                </button>
+                
+                <div style="height: 80px;"></div>
+            </div>
+            
+            <!-- Pickup Screen -->
+            <div class="screen" id="pickup-screen">
+                <div class="app-header">
+                    <h1>Ready for Pickup! 🎉</h1>
+                    <p>Show this code at the counter</p>
+                </div>
+                
+                <div class="qr-container">
+                    <h3>Scan to Pick Up</h3>
+                    <div class="qr-code"></div>
+                    <p style="color: #86868b; font-size: 14px;">Order #CD-2024-1129</p>
+                </div>
+                
+                <div class="order-details">
+                    <h3 style="margin-bottom: 15px;">Today's Order</h3>
+                    <div class="order-item">
+                        <div>
+                            <strong>Thai Green Curry</strong>
+                            <div style="color: #86868b; font-size: 12px;">Lunch • 11:30-1:30 PM</div>
+                        </div>
+                        <span style="color: #34c759;">✓</span>
+                    </div>
+                    <div class="order-item">
+                        <div>
+                            <strong>Beef Burrito Bowl</strong>
+                            <div style="color: #86868b; font-size: 12px;">Dinner • 5:00-7:00 PM</div>
+                        </div>
+                        <span style="color: #86868b;">Pending</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Impact Screen -->
+            <div class="screen" id="impact-screen">
+                <div class="app-header">
+                    <h1>Your Impact 🌟</h1>
+                    <p>Making a difference, one meal at a time</p>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">$486</div>
+                        <div class="stat-label">Saved This Year</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">142</div>
+                        <div class="stat-label">Meals Enjoyed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">2,840</div>
+                        <div class="stat-label">Points Earned</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">7</div>
+                        <div class="stat-label">Meals Gifted</div>
+                    </div>
+                </div>
+                
+                <div style="padding: 0 20px;">
+                    <div style="background: #f5f5f7; padding: 20px; border-radius: 16px;">
+                        <h3 style="margin-bottom: 10px;">Community Goal</h3>
+                        <div style="background: #e5e5e7; height: 20px; border-radius: 10px; overflow: hidden;">
+                            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); width: 73%; height: 100%;"></div>
+                        </div>
+                        <p style="color: #86868b; font-size: 14px; margin-top: 10px;">
+                            73% to 10,000 free meals this month
+                        </p>
+                    </div>
+                </div>
+                
+                <div style="padding: 20px;">
+                    <h3 style="margin-bottom: 15px;">Your Savings Comparison</h3>
+                    <div style="background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.08);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span>Your average before Cody's:</span>
+                            <strong>$14.50/meal</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span>With Cody's:</span>
+                            <strong style="color: #34c759;">$6.99/meal</strong>
+                        </div>
+                        <hr style="border: none; border-top: 1px solid #e5e5e7; margin: 10px 0;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>You save:</span>
+                            <strong style="color: #667eea;">$7.51/meal</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bottom Navigation -->
+            <div class="bottom-nav">
+                <div class="nav-item active" onclick="showScreen('home-screen', this)">
+                    <span class="nav-icon">🏠</span>
+                    <span class="nav-label">Order</span>
+                </div>
+                <div class="nav-item" onclick="showScreen('pickup-screen', this)">
+                    <span class="nav-icon">📱</span>
+                    <span class="nav-label">Pickup</span>
+                </div>
+                <div class="nav-item" onclick="showScreen('impact-screen', this)">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-label">Impact</span>
+                </div>
+                <div class="nav-item">
+                    <span class="nav-icon">👤</span>
+                    <span class="nav-label">Profile</span>
+                </div>
+            </div>
+            
+            <!-- Capacity Alert Modal -->
+            <div class="modal" id="capacity-modal">
+                <div class="modal-content">
+                    <div class="modal-icon">⚡</div>
+                    <h3>Almost at Capacity!</h3>
+                    <p>Only 153 lunch spots remaining for tomorrow. Confirm now to secure your meal and help us reduce food waste.</p>
+                    <div class="modal-buttons">
+                        <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+                        <button class="btn-confirm" onclick="confirmAndPay()">Confirm & Pay $6.99</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let selectedMeal = null;
+        let selectedTime = 'lunch';
+        
+        function selectTimeSlot(tab, time) {
+            document.querySelectorAll('.time-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            selectedTime = time;
+            
+            document.getElementById('lunch-options').style.display = time === 'lunch' ? 'block' : 'none';
+            document.getElementById('dinner-options').style.display = time === 'dinner' ? 'block' : 'none';
+            
+            // Reset meal selection
+            document.querySelectorAll('.meal-card').forEach(card => card.classList.remove('selected'));
+            selectedMeal = null;
+            updateButton();
+        }
+        
+        function selectMeal(card) {
+            document.querySelectorAll('.meal-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            selectedMeal = card.querySelector('h3').textContent;
+            updateButton();
+        }
+        
+        function updateButton() {
+            const button = document.querySelector('.confirm-button');
+            if (selectedMeal) {
+                button.disabled = false;
+                button.textContent = `Reserve ${selectedTime === 'lunch' ? 'Lunch' : 'Dinner'} - $6.99`;
+            } else {
+                button.disabled = true;
+                button.textContent = 'Select a Meal to Continue';
+            }
+        }
+        
+        function confirmOrder() {
+            // Simulate capacity check
+            const remainingSpots = Math.floor(Math.random() * 200) + 50;
+            if (remainingSpots < 200) {
+                document.getElementById('capacity-modal').classList.add('active');
+            } else {
+                confirmAndPay();
+            }
+        }
+        
+        function closeModal() {
+            document.getElementById('capacity-modal').classList.remove('active');
+        }
+        
+        function confirmAndPay() {
+            closeModal();
+            // Update balance
+            const balanceEl = document.querySelector('.balance-amount');
+            const currentBalance = parseFloat(balanceEl.textContent.replace('$', ''));
+            balanceEl.textContent = `$${(currentBalance - 6.99).toFixed(2)}`;
+            
+            // Show confirmation
+            alert(`✅ Confirmed!\n\n${selectedMeal}\n${selectedTime === 'lunch' ? 'Lunch: 11:30 AM - 1:30 PM' : 'Dinner: 5:00 PM - 7:00 PM'}\n\nYour meal is reserved and paid. See you tomorrow!`);
+            
+            // Reset selection
+            document.querySelectorAll('.meal-card').forEach(card => card.classList.remove('selected'));
+            selectedMeal = null;
+            updateButton();
+        }
+        
+        function showScreen(screenId, navItem) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            // Show selected screen
+            document.getElementById(screenId).classList.add('active');
+            
+            // Update nav
+            if (navItem) {
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                navItem.classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>
